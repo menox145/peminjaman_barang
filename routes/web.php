@@ -5,6 +5,9 @@ use App\Http\Controllers\LoginController;
 use App\Http\Controllers\PinjamController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\MasterTindakanController;
+use App\Http\Controllers\MasterTindakanController;
+
 
 // Public routes
 Route::get('/', function () {
@@ -19,9 +22,18 @@ Route::get('/about', function () {
     return view('welcome');
 })->middleware('auth');
 
+Route::get('/mastertindakan', function () {
+    return view('cost.MasterTindakan', [
+        'title' => 'Master Tindakan',
+        'tindakan' => App\Models\MasterTindakan::latest()->get(),
+        'peminjaman' => collect([]) // Empty collection for compatibility
+    ]);
+})->middleware('auth');
+
 // Public borrowing form - no auth required
 Route::get('/pinjam/form', [PinjamController::class, 'create'])->name('pinjam.create');
 Route::post('/pinjam/store', [PinjamController::class, 'store'])->name('pinjam.store');
+
 
 // Auth routes
 Route::get('/login', [LoginController::class, 'index'])->name('login')->middleware('guest');
@@ -47,3 +59,17 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/pinjam/{pinjam}/return', [PinjamController::class, 'return'])->name('pinjam.return');
     Route::delete('/pinjam/{pinjam}', [PinjamController::class, 'destroy'])->name('pinjam.destroy');
 });
+
+// Master Tindakan Routes
+Route::middleware(['auth'])->group(function () {
+    Route::resource('master/tindakan', MasterTindakanController::class)->names([
+        'index' => 'master.tindakan.index',
+        'create' => 'master.tindakan.create',
+        'store' => 'master.tindakan.store',
+        'show' => 'master.tindakan.show',
+        'edit' => 'master.tindakan.edit',
+        'update' => 'master.tindakan.update',
+        'destroy' => 'master.tindakan.destroy',
+    ]);
+});
+Route::post('/service', [ServiceController::class, 'logout']);

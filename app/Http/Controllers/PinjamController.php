@@ -19,12 +19,6 @@ class PinjamController extends Controller
             return redirect()->route('login');
         }
 
-        // Then check if user is admin
-        if (!Auth::user()->is_admin) {
-            return redirect()->route('pinjam.create')
-                ->with('error', 'Anda tidak memiliki akses ke halaman tersebut.');
-        }
-
         return view('pinjam.index', [
             'title' => 'Daftar Peminjaman',
             'peminjaman' => Peminjaman::with(['barang', 'user'])->latest()->get(),
@@ -37,15 +31,6 @@ class PinjamController extends Controller
         // Check if user is logged in
         if (!Auth::check()) {
             return redirect()->route('login');
-        }
-
-        // If user is admin, show all borrowing data
-        if (Auth::user()->is_admin) {
-            return view('pinjam.admin', [
-                'title' => 'Daftar Peminjaman',
-                'peminjaman' => Peminjaman::with(['barang', 'user'])->latest()->get(),
-                'barangs' => Barang::all()
-            ]);
         }
 
         // For regular users, show their borrowing history and the form
@@ -63,7 +48,7 @@ class PinjamController extends Controller
     {
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
-            'unit_bagian' => 'required|string|in:akademik,keuangan,kemahasiswaan,umum,lainnya',
+            'unit_bagian' => 'required|string|in:ranap,keuangan,rajal,adm,igd,icu,Kedokteran',
             'barang_id' => 'required|exists:data_barang,id',
             'jumlah_pinjam' => 'required|integer|min:1',
             'tanggal_pinjam' => 'required|date',
@@ -92,7 +77,7 @@ class PinjamController extends Controller
                 'username' => $username,
                 'email' => $email,
                 'password' => bcrypt('password'), // Set a default password
-                'is_admin' => false,
+                // Tidak perlu is_admin
                 'unit_bagian' => $validatedData['unit_bagian']
             ]
         );
@@ -122,12 +107,6 @@ class PinjamController extends Controller
             return redirect()->route('login');
         }
 
-        // Then check if user is admin
-        if (!Auth::user()->is_admin) {
-            return redirect()->route('pinjam.create')
-                ->with('error', 'Anda tidak memiliki akses ke halaman tersebut.');
-        }
-
         return view('pinjam.show', [
             'title' => 'Detail Peminjaman',
             'pinjam' => $pinjam
@@ -139,12 +118,6 @@ class PinjamController extends Controller
         // Check if user is logged in first
         if (!Auth::check()) {
             return redirect()->route('login');
-        }
-
-        // Then check if user is admin
-        if (!Auth::user()->is_admin) {
-            return redirect()->route('pinjam.create')
-                ->with('error', 'Anda tidak memiliki akses ke halaman tersebut.');
         }
 
         if ($pinjam->status !== 'dipinjam') {
@@ -166,12 +139,6 @@ class PinjamController extends Controller
         // Check if user is logged in first
         if (!Auth::check()) {
             return redirect()->route('login');
-        }
-
-        // Then check if user is admin
-        if (!Auth::user()->is_admin) {
-            return redirect()->route('pinjam.create')
-                ->with('error', 'Anda tidak memiliki akses ke halaman tersebut.');
         }
 
         if ($pinjam->status !== 'dipinjam') {
